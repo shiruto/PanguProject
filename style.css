@@ -8,10 +8,15 @@ body {
 
 header,
 p {
-	width: 250px;
+	width: 300px;
 	margin: 0%;
 	height: 30px;
 	text-align: center;
+}
+
+header {
+	font-size: 20px;
+	font-weight: bold;
 }
 
 div {
@@ -21,6 +26,12 @@ div {
 button {
 	margin: 5px;
 	text-align: center;
+}
+
+ul {
+	display: flex;
+	margin: 0px;
+	padding-left: 10px;
 }
 
 .holders {
@@ -77,6 +88,8 @@ button {
 	text-align: center;
 	flex-direction: column;
 	line-height: 2em;
+	display: flex;
+	align-items: center;
 }
 
 #MODleft {
@@ -86,6 +99,10 @@ button {
 #Preserve {
 	width: 50%;
 	min-width: none;
+}
+
+#NextTurnBtn {
+	display: none;
 }
 
 .coloum {
@@ -104,33 +121,47 @@ button {
 	float: right;
 }
 
-.dice {
+.Dice {
 	width: 50px;
 	height: 50px;
 	margin: 10px;
 	display: flex;
+	text-align: center;
 }
 
-.diceNum {
-	text-align: center;
+.DiceNum {
+	margin-top: 5px;
 	font-size: 30px;
 }
 
 .item {
-	width: 50px;
-	height: 100px;
-	margin: 25px;
+	width: 100px;
+	height: 120px;
+	margin: 10px;
 	float: left;
 	display: flex;
 	flex-direction: column;
+	text-align: center;
 }
 
 .itemName {
-	width: 100%;
-	font-size: 20px;
+	width: 90%;
+	font-size: 16px;
+	text-align: center;
+	height: auto;
+	margin-bottom: 5px;
 }
 
 .itemDes {
-	width: 100%;
-	font-size: 16px;
+	width: 90%;
+	font-size: 14px;
+}
+
+.MODBtn {
+	width: 30px;
+}
+
+.SelectedDice,
+.clickable {
+	border: 5px solid green;
 }

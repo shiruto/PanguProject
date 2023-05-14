@@ -1,27 +1,27 @@
 {
     "projects": [
         {
-            "id": 1,
+            "id": 0,
             "name": "Inari Project",
             "cost": "six 1s"
         },
         {
-            "id": 2,
+            "id": 1,
             "name": "Dazbog Project",
             "cost": "seven of a kind"
         },
         {
-            "id": 3,
+            "id": 2,
             "name": "Pangu Project",
             "cost": "Sum=40"
         },
         {
-            "id": 4,
+            "id": 3,
             "name": "Vesta Project",
             "cost": "two triples in a row. Can't be purchased if you haven't built another card this turn"
         },
         {
-            "id": 5,
+            "id": 4,
             "name": "Te Kore Project",
             "cost": "two sets of four of a kind"
         },
@@ -42,16 +42,11 @@
         },
         {
             "id": 8,
-            "name": "Dazbog Project",
-            "cost": "seven of a kind"
-        },
-        {
-            "id": 9,
             "name": "Athena Project",
             "cost": "four wild"
         },
         {
-            "id": 10,
+            "id": 9,
             "name": "Herus Project",
             "cost": "six in a row. Can't be purchased if you activated Command Center this turn."
         }
