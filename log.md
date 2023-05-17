@@ -38,10 +38,3 @@
 
 ## To-Do
 
-Wild的骰子仍会消耗`M.O.D.`点数
-
-每轮新增一个Blueprint
-
-点击colony会改变位置
-
-turnend时清除SelectedDIce

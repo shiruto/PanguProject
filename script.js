@@ -82,6 +82,7 @@ class Dice {
         this.dice.firstChild.innerText = "" + this.num;
         this.dice.style.backgroundColor = this.diceStatus;
         if (this.dice.parentElement != this.place) {
+            console.log("org: " + this.dice.parentElement);
             this.place.appendChild(this.dice);
         }
     }
@@ -98,17 +99,19 @@ class ItemObj {
         this.nameE.className = "itemName";
         this.desE.className = "itemDes";
         this.bought = false;
-        this.item.addEventListener('click', () => this.buy());
+        this.anoFunc = () => this.buy();
+        this.item.addEventListener('click', this.anoFunc);
     }
 
     buy() {
         if (this.isValid()) {
+            console.log("buy " + Object.getPrototypeOf(this).constructor.name);
             this.BuyImplement();
             this.bought = true;
             this.clickChance = this.maxClickChance;
             spendDice();
             this.VisualUpdate();
-            this.item.removeEventListener('click', () => this.buy());
+            this.item.removeEventListener('click', this.anoFunc);
             this.item.addEventListener('click', () => this.Use());
         }
     }
@@ -121,6 +124,7 @@ class ItemObj {
 
     Use() {
         if (this.canUse() && this.canImplement()) {
+            console.log("use " + Object.getPrototypeOf(this).constructor.name);
             this.useImplement();
             this.clickChance--;
             this.VisualUpdate();
@@ -170,6 +174,8 @@ class Blueprint extends ItemObj {
     }
 
     BuyImplement() {
+        super.BuyImplement();
+        console.log("Blueprint's buy implement");
         ColonyE.append(this.item);
     }
 
@@ -192,12 +198,8 @@ class baseColony extends ItemObj {
         this.item.id = "baseColony" + id;
     }
 
-    addItem() {
-        super.addItem(ColonyE);
-    }
-
     BuyImplement() {
-        this.addItem();
+        super.addItem(ColonyE);;
     }
 
     isValid() {
@@ -325,7 +327,7 @@ class Drone6 extends Blueprint {
         return isOfAKind();
     }
 
-    buyImplement() {
+    BuyImplement() {
         turnStartEvents.push(() => RollADieAt(DiceE, 6, diceStatus.Fixed));
     }
 
@@ -343,7 +345,7 @@ class Drone5 extends Blueprint {
         return isOfAKind();
     }
 
-    buyImplement() {
+    BuyImplement() {
         turnStartEvents.push(() => RollADieAt(DiceE, 5, diceStatus.Fixed));
     }
 
@@ -361,7 +363,7 @@ class Drone4 extends Blueprint {
         return isOfAKind();
     }
 
-    buyImplement() {
+    BuyImplement() {
         turnStartEvents.push(() => RollADieAt(DiceE, 4, diceStatus.Fixed));
     }
 
@@ -379,7 +381,7 @@ class Drone3 extends Blueprint {
         return isOfAKind();
     }
 
-    buyImplement() {
+    BuyImplement() {
         turnStartEvents.push(() => RollADieAt(DiceE, 3, diceStatus.Fixed));
     }
 
@@ -397,7 +399,7 @@ class Drone2 extends Blueprint {
         return isOfAKind();
     }
 
-    buyImplement() {
+    BuyImplement() {
         turnStartEvents.push(() => RollADieAt(DiceE, 2, diceStatus.Fixed));
     }
 
@@ -415,7 +417,7 @@ class Drone1 extends Blueprint {
         return isOfAKind();
     }
 
-    buyImplement() {
+    BuyImplement() {
         turnStartEvents.push(() => RollADieAt(DiceE, 1, diceStatus.Fixed));
     }
 
@@ -431,7 +433,7 @@ class Dome extends Blueprint {
         return isFullHouse();
     }
 
-    buyImplement() {
+    BuyImplement() {
         turnStartEvents.push(() => RollADieAt(PreserveE));
     }
 
@@ -448,7 +450,9 @@ class Prospector extends Blueprint {
         return isOfAKind();
     }
 
-    buyImplement() {
+    BuyImplement() {
+        console.log("prospector's buy implement");
+        super.BuyImplement();
         turnStartEvents.push(() => RollADieAt(PreserveE, 0, diceStatus.Fixed));
     }
 
@@ -465,7 +469,7 @@ class Shuttle extends Blueprint {
         return isOfAKind();
     }
 
-    buyImplement() {
+    BuyImplement() {
         MODSum += 2;
         canChangeSixToOne = true;
     }
@@ -486,7 +490,7 @@ class ReplicantRobot extends Blueprint {
         return true;
     }
 
-    buyImplement() {
+    BuyImplement() {
         turnStartEvents.push(() => RollADieAt(DiceE, 1, diceStatus.Wild));
     }
 
@@ -528,7 +532,7 @@ class Monopole extends Blueprint {
         return true;
     }
 
-    buyImplement() {
+    BuyImplement() {
         turnStartEvents.push(() => RollADieAt(DiceE, GetRandomOddNum(), diceStatus.Wild));
     }
 
@@ -573,7 +577,7 @@ class EnergySaver extends Blueprint {
         return isOfAKind();
     }
 
-    buyImplement() {
+    BuyImplement() {
         turnEndEvents.push(() => {
             if (document.querySelectorAll(".Dice").length > 1) {
                 RollADieAt(DiceE, GetRandomOddNum(), diceStatus.Wild);
@@ -594,7 +598,7 @@ class Recycing extends Blueprint {
         return isOfAKind();
     }
 
-    buyImplement() {
+    BuyImplement() {
         whenSpendDice.push(() => {
             selectedDices.forEach(e => {
                 if (e.diceStatus == diceStatus.Wild) {
@@ -618,7 +622,7 @@ class TouristAttraction extends Blueprint {
         return isInARow();
     }
 
-    buyImplement() {
+    BuyImplement() {
         turnStartEvents.push(() => {
             for (let i = 0; i < 4 - projectLeft; i++) {
                 RollADieAt(DiceE);
@@ -639,7 +643,7 @@ class SelfrepairMaterial extends Blueprint {
         return isOfAKind();
     }
 
-    buyImplement() {
+    BuyImplement() {
         turnEndEvents.push(() => {
             if (PreserveE.querySelectorAll(".Dice").length == 0) diceToRoll += 2;
         });
@@ -659,7 +663,7 @@ class Observatory extends Blueprint {
         return isInARow();
     }
 
-    buyImplement() {
+    BuyImplement() {
         GetRandomBlueprint();
         MODGetWhenDiscard++;
     }
@@ -701,7 +705,7 @@ class Prototype extends Blueprint {
         return isInARow();
     }
 
-    buyImplement() {
+    BuyImplement() {
         turnStartEvents.push(() => RollADieAt(DiceE, 0, diceStatus.Fixed));
     }
 
@@ -765,7 +769,7 @@ class Settlement extends Blueprint {
         return isInARow();
     }
 
-    buyImplement() {
+    BuyImplement() {
         turnStartEvents.push(() => RollADieAt());
     }
 
@@ -782,7 +786,7 @@ class BionicRobot extends Blueprint {
         return isOfAKind();
     }
 
-    buyImplement() {
+    BuyImplement() {
         whenReroll.push(() => {
             if (diceToReroll.length == 1) {
                 RollADieAt();
@@ -828,7 +832,7 @@ class Transporter extends Blueprint {
         else return false;
     }
 
-    buyImplement() {
+    BuyImplement() {
         turnStartEvents.push(() => {
             MODSum++;
         });
@@ -847,7 +851,7 @@ class OMNI extends Blueprint {
         return isOfAKind();
     }
 
-    buyImplement() {
+    BuyImplement() {
         turnStartEvents.push(() => {
             RollADieAt(PreserveE, 1, diceStatus.Wild);
         });
@@ -884,7 +888,6 @@ class Project extends ItemObj {
     constructor(id) {
         super();
         let proj = ProjectList.find(e => e.id == id);
-        console.log(proj.name);
         this.name = proj.name;
         this.des = "Cost: " + proj.cost;
         this.item.id = "Project" + id;
@@ -1145,6 +1148,7 @@ const startBtn = document.querySelector("#NewGameButton");
 const nextTurnBtn = document.getElementById("NextTurnBtn");
 const MODPlusBtn = document.getElementById("MODPlusBtn");
 const MODMinusBtn = document.getElementById("MODMinusBtn");
+const ruleBtn = document.getElementById("RulesButton");
 const totalTurn = 10;
 var HeadquarterUseChance = 2;
 var turnPassed = 0;
@@ -1183,21 +1187,22 @@ function GameStart() {
     nextTurnBtn.addEventListener('click', () => EndTurn());
     MODPlusBtn.addEventListener('click', () => {
         if (selectedDices.length != 1) return;
-        if (MODSum >= 1 && (selectedDices[0].num != 6 || canChangeSixToOne)) {
+        if (selectedDices[0].diceStatus == diceStatus.Wild || (MODSum >= 1 && (selectedDices[0].num != 6 || canChangeSixToOne))) {
             selectedDices[0].ChangeNum(++selectedDices[0].num);
-            if (selectedDices[0].Status != diceStatus.Wild) MODSum--;
+            if (selectedDices[0].diceStatus != diceStatus.Wild) MODSum--;
             UpdateMOD();
         }
 
     });
     MODMinusBtn.addEventListener('click', () => {
         if (selectedDices.length != 1) return;
-        if (MODSum >= 1 && (selectedDices[0].num != 1 || canChangeSixToOne)) {
+        if (selectedDices[0].diceStatus == diceStatus.Wild || (MODSum >= 1 && (selectedDices[0].num != 1 || canChangeSixToOne))) {
             selectedDices[0].ChangeNum(--selectedDices[0].num);
-            if (selectedDices[0].Status != diceStatus.Wild) MODSum--;
+            if (selectedDices[0].diceStatus != diceStatus.Wild) MODSum--;
             UpdateMOD();
         }
     });
+    ruleBtn.addEventListener('click', () => window.open("./PanguProject.pdf"));
     GetRandomProject();
     for (let i = 0; i < 3; i++) {
         GetRandomBlueprint();
@@ -1241,11 +1246,8 @@ function UpdateMOD() {
 function GetRandomProject() {
     for (let i = 0; i < 4; i++) {
         let num = GetRandomNumWithin(0, ProjectList.length - 1);
-        console.log(num);
-        console.log(ProjectList.slice());
         eval(`new ${ProjectList[num].name.replace(/ /g, "")}()`);
         ProjectList.splice(num, 1);
-        console.log(ProjectList.slice());
     }
 }
 
@@ -1333,12 +1335,15 @@ function RerollDices(targetDices = selectedDices.filter(e => e.diceStatus == dic
     if (whenReroll.length != 0) {
         whenReroll.forEach(e => e());
     }
-    targetDices.forEach(e => e.Reroll());
+    targetDices.forEach(e => {
+        e.Reroll()
+    });
 }
 
 var turnEndEvents = new Array();
 function EndTurn() {
     turnPassed++;
+    selectedDices.length = 0;
     UpdateTurnInfo();
     if (turnPassed == totalTurn) {
         alert("gameOver");
@@ -1377,6 +1382,7 @@ function StartTurn() {
     GetRandomBlueprint();
     diceToRoll = 0;
     Colonies.forEach(e => {
+        e.clickChance = e.maxClickChance;
         if (e.maxClickChance > 0) e.classList.add("clickable");
     });
 }
