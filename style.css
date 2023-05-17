@@ -51,7 +51,7 @@ ul {
 }
 
 #line3 {
-	height: 150px;
+	height: 200px;
 }
 
 #line4 {
@@ -135,9 +135,10 @@ ul {
 }
 
 .item {
-	width: 100px;
-	height: 120px;
+	width: 120px;
+	height: 125px;
 	margin: 10px;
+	margin-top: 0px;
 	float: left;
 	display: flex;
 	flex-direction: column;
@@ -146,7 +147,7 @@ ul {
 
 .itemName {
 	width: 90%;
-	font-size: 16px;
+	font-size: 14px;
 	text-align: center;
 	height: auto;
 	margin-bottom: 5px;
@@ -154,7 +155,7 @@ ul {
 
 .itemDes {
 	width: 90%;
-	font-size: 14px;
+	font-size: 13px;
 }
 
 .MODBtn {

@@ -5,3 +5,7 @@
 搬到网页上 练习前端开发
 
 规则: [Rulebook](./PanguProject.pdf)
+
+开发日志: [Log](./log.md)
+
+侵删
