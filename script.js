@@ -53,10 +53,12 @@ class Dice {
             if (this.dice.classList.contains("SelectedDice")) {
                 this.dice.classList.remove("SelectedDice");
                 selectedDices.splice(selectedDices.indexOf(this), 1);
+                console.log(`Unselected No.${this.id} dice`);
             }
             else {
                 this.dice.classList.add("SelectedDice");
                 selectedDices.push(this);
+                console.log(`Selected No.${this.id} dice`);
             }
         });
         parent.appendChild(this.dice);
@@ -64,7 +66,9 @@ class Dice {
     }
 
     Reroll() {
-        this.num = GetRandomNumWithin(1, 6);
+        let numb = GetRandomNumWithin(1, 6);
+        console.log(`Reroll No.${this.id} Dice, it's value equals ${this.num}, new value equals ${numb}`);
+        this.num = numb;
         this.UpdateVisual();
     }
 
@@ -82,7 +86,6 @@ class Dice {
         this.dice.firstChild.innerText = "" + this.num;
         this.dice.style.backgroundColor = this.diceStatus;
         if (this.dice.parentElement != this.place) {
-            console.log("org: " + this.dice.parentElement);
             this.place.appendChild(this.dice);
         }
     }
@@ -113,6 +116,7 @@ class ItemObj {
             this.VisualUpdate();
             this.item.removeEventListener('click', this.anoFunc);
             this.item.addEventListener('click', () => this.Use());
+            Colonies.push(this);
         }
     }
 
@@ -175,7 +179,6 @@ class Blueprint extends ItemObj {
 
     BuyImplement() {
         super.BuyImplement();
-        console.log("Blueprint's buy implement");
         ColonyE.append(this.item);
     }
 
@@ -328,6 +331,7 @@ class Drone6 extends Blueprint {
     }
 
     BuyImplement() {
+        super.BuyImplement();
         turnStartEvents.push(() => RollADieAt(DiceE, 6, diceStatus.Fixed));
     }
 
@@ -346,6 +350,7 @@ class Drone5 extends Blueprint {
     }
 
     BuyImplement() {
+        super.BuyImplement();
         turnStartEvents.push(() => RollADieAt(DiceE, 5, diceStatus.Fixed));
     }
 
@@ -364,6 +369,7 @@ class Drone4 extends Blueprint {
     }
 
     BuyImplement() {
+        super.BuyImplement();
         turnStartEvents.push(() => RollADieAt(DiceE, 4, diceStatus.Fixed));
     }
 
@@ -382,6 +388,7 @@ class Drone3 extends Blueprint {
     }
 
     BuyImplement() {
+        super.BuyImplement();
         turnStartEvents.push(() => RollADieAt(DiceE, 3, diceStatus.Fixed));
     }
 
@@ -400,6 +407,7 @@ class Drone2 extends Blueprint {
     }
 
     BuyImplement() {
+        super.BuyImplement();
         turnStartEvents.push(() => RollADieAt(DiceE, 2, diceStatus.Fixed));
     }
 
@@ -418,6 +426,7 @@ class Drone1 extends Blueprint {
     }
 
     BuyImplement() {
+        super.BuyImplement();
         turnStartEvents.push(() => RollADieAt(DiceE, 1, diceStatus.Fixed));
     }
 
@@ -434,6 +443,7 @@ class Dome extends Blueprint {
     }
 
     BuyImplement() {
+        super.BuyImplement();
         turnStartEvents.push(() => RollADieAt(PreserveE));
     }
 
@@ -470,6 +480,7 @@ class Shuttle extends Blueprint {
     }
 
     BuyImplement() {
+        super.BuyImplement();
         MODSum += 2;
         canChangeSixToOne = true;
     }
@@ -491,6 +502,7 @@ class ReplicantRobot extends Blueprint {
     }
 
     BuyImplement() {
+        super.BuyImplement();
         turnStartEvents.push(() => RollADieAt(DiceE, 1, diceStatus.Wild));
     }
 
@@ -533,6 +545,7 @@ class Monopole extends Blueprint {
     }
 
     BuyImplement() {
+        super.BuyImplement();
         turnStartEvents.push(() => RollADieAt(DiceE, GetRandomOddNum(), diceStatus.Wild));
     }
 
@@ -578,6 +591,7 @@ class EnergySaver extends Blueprint {
     }
 
     BuyImplement() {
+        super.BuyImplement();
         turnEndEvents.push(() => {
             if (document.querySelectorAll(".Dice").length > 1) {
                 RollADieAt(DiceE, GetRandomOddNum(), diceStatus.Wild);
@@ -587,7 +601,7 @@ class EnergySaver extends Blueprint {
 
 }
 
-class Recycing extends Blueprint {
+class Recycling extends Blueprint {
     constructor() {
         super(16);
         this.maxClickChance = 0;
@@ -599,6 +613,7 @@ class Recycing extends Blueprint {
     }
 
     BuyImplement() {
+        super.BuyImplement();
         whenSpendDice.push(() => {
             selectedDices.forEach(e => {
                 if (e.diceStatus == diceStatus.Wild) {
@@ -623,6 +638,7 @@ class TouristAttraction extends Blueprint {
     }
 
     BuyImplement() {
+        super.BuyImplement();
         turnStartEvents.push(() => {
             for (let i = 0; i < 4 - projectLeft; i++) {
                 RollADieAt(DiceE);
@@ -644,6 +660,7 @@ class SelfrepairMaterial extends Blueprint {
     }
 
     BuyImplement() {
+        super.BuyImplement();
         turnEndEvents.push(() => {
             if (PreserveE.querySelectorAll(".Dice").length == 0) diceToRoll += 2;
         });
@@ -664,6 +681,7 @@ class Observatory extends Blueprint {
     }
 
     BuyImplement() {
+        super.BuyImplement();
         GetRandomBlueprint();
         MODGetWhenDiscard++;
     }
@@ -706,6 +724,7 @@ class Prototype extends Blueprint {
     }
 
     BuyImplement() {
+        super.BuyImplement();
         turnStartEvents.push(() => RollADieAt(DiceE, 0, diceStatus.Fixed));
     }
 
@@ -770,6 +789,7 @@ class Settlement extends Blueprint {
     }
 
     BuyImplement() {
+        super.BuyImplement();
         turnStartEvents.push(() => RollADieAt());
     }
 
@@ -787,6 +807,7 @@ class BionicRobot extends Blueprint {
     }
 
     BuyImplement() {
+        super.BuyImplement();
         whenReroll.push(() => {
             if (diceToReroll.length == 1) {
                 RollADieAt();
@@ -833,6 +854,7 @@ class Transporter extends Blueprint {
     }
 
     BuyImplement() {
+        super.BuyImplement();
         turnStartEvents.push(() => {
             MODSum++;
         });
@@ -852,6 +874,7 @@ class OMNI extends Blueprint {
     }
 
     BuyImplement() {
+        super.BuyImplement();
         turnStartEvents.push(() => {
             RollADieAt(PreserveE, 1, diceStatus.Wild);
         });
@@ -915,10 +938,6 @@ class InariProject extends Project {
         super(0);
     }
 
-    buy() {
-        super.buy();
-    }
-
     isValid() {
         if (selectedDices.length != 6) return false;
         selectedDices.forEach(e => {
@@ -931,10 +950,6 @@ class InariProject extends Project {
 class DazbogProject extends Project {
     constructor() {
         super(1);
-    }
-
-    buy() {
-        super.buy();
     }
 
     isValid() {
@@ -951,10 +966,6 @@ class PanguProject extends Project {
         super(2);
     }
 
-    buy() {
-        super.buy();
-    }
-
     isValid() {
         let sum = 0;
         selectedDices.forEach(e => {
@@ -968,10 +979,6 @@ class PanguProject extends Project {
 class VestaProject extends Project {
     constructor() {
         super(3);
-    }
-
-    buy() {
-        super.buy();
     }
 
     isValid() {
@@ -1004,10 +1011,6 @@ class TeKoreProject extends Project {
         super(4);
     }
 
-    buy() {
-        super.buy();
-    }
-
     isValid() {
         let sum1 = 0;
         let sum2 = 0;
@@ -1034,10 +1037,6 @@ class VishnuProject extends Project {
         super(5);
     }
 
-    buy() {
-        super.buy();
-    }
-
     isValid() {
         if (selectedDices.length != 6) return false;
         selectedDices.forEach(e => {
@@ -1050,10 +1049,6 @@ class VishnuProject extends Project {
 class FreyaProject extends Project {
     constructor() {
         super(6);
-    }
-
-    buy() {
-        super.buy();
     }
 
     isValid() {
@@ -1079,10 +1074,6 @@ class QuetzalcoatlProject extends Project {
         super(7);
     }
 
-    buy() {
-        super.buy();
-    }
-
     isValid() {
         let count = 0;
         selectedDices.forEach(e => {
@@ -1101,10 +1092,6 @@ class AthenaProject extends Project {
         super(8);
     }
 
-    buy() {
-        super.buy();
-    }
-
     isValid() {
         let count = 0;
         selectedDices.forEach(e => {
@@ -1120,10 +1107,6 @@ class AthenaProject extends Project {
 class HerusProject extends Project {
     constructor() {
         super(9);
-    }
-
-    buy() {
-        super.buy();
     }
 
     isValid() {
@@ -1187,18 +1170,21 @@ function GameStart() {
     nextTurnBtn.addEventListener('click', () => EndTurn());
     MODPlusBtn.addEventListener('click', () => {
         if (selectedDices.length != 1) return;
-        if (selectedDices[0].diceStatus == diceStatus.Wild || (MODSum >= 1 && (selectedDices[0].num != 6 || canChangeSixToOne))) {
+        if ((selectedDices[0].diceStatus == diceStatus.Wild && selectedDices[0].num < 6) || (MODSum >= 1 && (selectedDices[0].num < 6 || canChangeSixToOne))) {
             selectedDices[0].ChangeNum(++selectedDices[0].num);
             if (selectedDices[0].diceStatus != diceStatus.Wild) MODSum--;
+            console.log(`Addtion in No.${selectedDices[0].id} Dice using M.O.D.`);
             UpdateMOD();
         }
 
     });
     MODMinusBtn.addEventListener('click', () => {
         if (selectedDices.length != 1) return;
-        if (selectedDices[0].diceStatus == diceStatus.Wild || (MODSum >= 1 && (selectedDices[0].num != 1 || canChangeSixToOne))) {
+        if ((selectedDices[0].diceStatus == diceStatus.Wild && selectedDices[0].num > 1) || (MODSum >= 1 && (selectedDices[0].num > 1 || canChangeSixToOne))) {
             selectedDices[0].ChangeNum(--selectedDices[0].num);
+            console.log(selectedDices[0].num);
             if (selectedDices[0].diceStatus != diceStatus.Wild) MODSum--;
+            console.log(`Substraction in No.${selectedDices[0].id} Dice using M.O.D.`);
             UpdateMOD();
         }
     });
@@ -1234,6 +1220,7 @@ function RollADieAt(Place = DiceE, num = 0, Status = diceStatus.Normal) {
     if (num == 0) tempDice.Reroll();
     else tempDice.ChangeNum(num);
     p.appendChild(tempDice.dice);
+    console.log(`Roll No.${tempDice.id} die at ${tempDice.place.parentElement.id}Element with its num = ${tempDice.num} and status = ${Object.keys(diceStatus).find((e) => diceStatus[e] == tempDice.diceStatus)}`);
     return tempDice;
 }
 
@@ -1321,6 +1308,7 @@ function isFullHouse() {
 
 var whenSpendDice = new Array();
 function spendDice() {
+    console.log("Dice Spent: ", selectedDices.slice());
     if (whenSpendDice.length > 0) {
         whenSpendDice.forEach(e => e());
     }
@@ -1381,9 +1369,10 @@ function StartTurn() {
     }
     GetRandomBlueprint();
     diceToRoll = 0;
+
     Colonies.forEach(e => {
         e.clickChance = e.maxClickChance;
-        if (e.maxClickChance > 0) e.classList.add("clickable");
+        if (e.maxClickChance > 0) e.item.classList.add("clickable");
     });
 }
 
@@ -1393,3 +1382,4 @@ function Win() {
 
 GameStart();
 MODSum = 10;
+RollADieAt(PreserveE, 1, diceStatus.Wild);

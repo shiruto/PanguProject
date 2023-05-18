@@ -172,7 +172,7 @@
         },
         {
             "id": 16,
-            "name": "Recycing",
+            "name": "Recycling",
             "cost": "three of a kind",
             "effect": "when you spend a wild die, roll an extra at the start of next round."
         },
@@ -251,7 +251,7 @@
         {
             "id": 29,
             "name": "Reactor16",
-            "cost": "Sum=16",
+            "cost": "Sum=16\n",
             "effect": "2 dice>equally distribute their value"
         }
     ]
