@@ -241,7 +241,7 @@ class Headquarter extends baseColony {
     BuyImplement() {
         super.BuyImplement();
         turnStartEvents.push(() => {
-            for (let i = 0; i < 5; i++) {
+            for (let i = 0; i < 4; i++) {
                 RollADieAt(dicePlace.Normal);
             }
         });
@@ -1498,11 +1498,11 @@ function Win() {
 }
 
 GameStart();
-new QuetzalcoatlProject();
-RollADieAt(PreserveE);
-RollADieAt(PreserveE);
-RollADieAt(PreserveE);
-RollADieAt();
-RollADieAt();
-RollADieAt();
-MODSum = 10;
+// new QuetzalcoatlProject();
+// RollADieAt(PreserveE);
+// RollADieAt(PreserveE);
+// RollADieAt(PreserveE);
+// RollADieAt();
+// RollADieAt();
+// RollADieAt();
+// MODSum = 10;
