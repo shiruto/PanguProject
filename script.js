@@ -241,7 +241,7 @@ class Headquarter extends baseColony {
     BuyImplement() {
         super.BuyImplement();
         turnStartEvents.push(() => {
-            for (let i = 0; i < 4; i++) {
+            for (let i = 0; i < 5; i++) {
                 RollADieAt(dicePlace.Normal);
             }
         });
@@ -1127,8 +1127,10 @@ class QuetzalcoatlProject extends Project {
     isValid() {
         let count = 0;
         selectedDices.forEach(e => {
-            if (e.num % 2 != 0) {
-                if (e.palce == dicePlace.Preserve) count += 2;
+            if (e.num % 2 == selectedDices[0].num % 2) {
+                if (e.dice.parentElement == dicePlace.Preserve) {
+                    count += 2;
+                }
                 else count++;
             }
         });
@@ -1401,11 +1403,12 @@ function isFullHouse() {
         console.log("not fullhouse");
         return false;
     }
-    let tempA = selectedDices.sort((a, b) => a - b);
+    let tempA = selectedDices.sort((a, b) => a.num - b.num);
     if ((tempA[0].num === tempA[1].num && tempA[1].num === tempA[2].num && tempA[3].num === tempA[4].num) ||
         (tempA[0].num === tempA[1].num && tempA[2].num === tempA[3].num && tempA[3].num === tempA[4].num)) {
         return true;
     } else {
+        console.log("in fullhouse func: ", tempA);
         console.log("not fullhouse");
         return false;
     }
@@ -1495,3 +1498,11 @@ function Win() {
 }
 
 GameStart();
+new QuetzalcoatlProject();
+RollADieAt(PreserveE);
+RollADieAt(PreserveE);
+RollADieAt(PreserveE);
+RollADieAt();
+RollADieAt();
+RollADieAt();
+MODSum = 10;
