@@ -42,4 +42,13 @@
 
 修复了回合开始不刷新使用次数的bug
 
+## Update-05-18
+
+修复了pair函数和removeduplicate函数
+
+修复了一些colony无法消耗骰子的bug
+
+修复了project无法购买的bug
+
 ## To-Do
+

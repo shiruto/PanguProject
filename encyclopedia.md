@@ -57,4 +57,5 @@
 | 3D Printer          | 1, 2, 3                                    | Click: 1 > A wild die                                        |
 | Transporter         | 2, 4, 6                                    | Start of turn: +1 M.O.D.                                     |
 | O.M.N.I             | five of a kind                             | Start of turn: gain and preserve a wild die.                 |
+| Reactor(16)         | sum=16                                     | 2 dice=>equally distribute their value                       |
 

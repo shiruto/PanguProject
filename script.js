@@ -53,12 +53,12 @@ class Dice {
             if (this.dice.classList.contains("SelectedDice")) {
                 this.dice.classList.remove("SelectedDice");
                 selectedDices.splice(selectedDices.indexOf(this), 1);
-                console.log(`Unselected No.${this.id} dice`);
+                console.log(`Unselected No.${this.id} dice`, this);
             }
             else {
                 this.dice.classList.add("SelectedDice");
                 selectedDices.push(this);
-                console.log(`Selected No.${this.id} dice`);
+                console.log(`Selected No.${this.id} dice`, this);
             }
         });
         parent.appendChild(this.dice);
@@ -67,6 +67,7 @@ class Dice {
 
     Reroll() {
         let numb = GetRandomNumWithin(1, 6);
+        while (numb == this.num) numb = GetRandomNumWithin(1, 6);
         console.log(`Reroll No.${this.id} Dice, it's value equals ${this.num}, new value equals ${numb}`);
         this.num = numb;
         this.UpdateVisual();
@@ -102,21 +103,25 @@ class ItemObj {
         this.nameE.className = "itemName";
         this.desE.className = "itemDes";
         this.bought = false;
-        this.anoFunc = () => this.buy();
-        this.item.addEventListener('click', this.anoFunc);
+        this.clickHandler = () => this.buy();
+        this.item.addEventListener('click', this.clickHandler);
     }
 
     buy() {
         if (this.isValid()) {
             console.log("buy " + Object.getPrototypeOf(this).constructor.name);
             this.BuyImplement();
-            this.bought = true;
-            this.clickChance = this.maxClickChance;
             spendDice();
             this.VisualUpdate();
-            this.item.removeEventListener('click', this.anoFunc);
+            this.item.removeEventListener('click', this.clickHandler);
             this.item.addEventListener('click', () => this.Use());
-            Colonies.push(this);
+            return true;
+        }
+        else {
+            console.log(`try to buy ${Object.getPrototypeOf(this).constructor.name} but failed`);
+            console.log(selectedDices);
+            infoEle.innerText = "Incorrect dice to buy this blueprint";
+            return false;
         }
     }
 
@@ -132,6 +137,10 @@ class ItemObj {
             this.useImplement();
             this.clickChance--;
             this.VisualUpdate();
+        }
+        else {
+            console.log(`try to use ${Object.getPrototypeOf(this).constructor.name} but failed`);
+            infoEle.innerText = "Incorrect dice to use this colony";
         }
     }
 
@@ -175,17 +184,27 @@ class Blueprint extends ItemObj {
         this.clickChance = 1;
         super.addItem(BlueprintE);
         this.bought = false;
+        this.rightClickHandler = (ev) => {
+            if (ev.button == 2 && !this.bought) this.discard();
+        };
+        this.item.addEventListener('mousedown', this.rightClickHandler);
     }
 
     BuyImplement() {
         super.BuyImplement();
+        this.item.removeEventListener('mousedown', this.rightClickHandler);
         ColonyE.append(this.item);
+        ifBuiltThisTurn = true;
+        Colonies.push(this);
+        this.bought = true;
+        this.clickChance = this.maxClickChance;
     }
 
     discard() {
         if (this.bought) return;
         MODSum += MODGetWhenDiscard;
         this.item.remove();
+        UpdateMOD();
     }
 
     addItem() {
@@ -202,7 +221,10 @@ class baseColony extends ItemObj {
     }
 
     BuyImplement() {
-        super.addItem(ColonyE);;
+        super.addItem(ColonyE);
+        Colonies.push(this);
+        this.bought = true;
+        this.clickChance = this.maxClickChance;
     }
 
     isValid() {
@@ -230,6 +252,7 @@ class Headquarter extends baseColony {
 class CommandCenter extends baseColony {
     constructor() {
         super(1);
+        this.des += "\ncan use twice each turn";
         this.maxClickChance = 2;
     }
 
@@ -238,7 +261,12 @@ class CommandCenter extends baseColony {
     }
 
     canImplement() {
-        return selectedDices.filter((e) => e.diceStatus != diceStatus.Fixed).length > 0;
+        if (selectedDices.filter((e) => e.diceStatus != diceStatus.Fixed).length > 0) {
+            return true;
+        }
+        else {
+            infoEle.innerText = "can't reroll fixed dice";
+        }
     }
 
 }
@@ -483,6 +511,7 @@ class Shuttle extends Blueprint {
         super.BuyImplement();
         MODSum += 2;
         canChangeSixToOne = true;
+        UpdateMOD();
     }
 
 }
@@ -517,7 +546,7 @@ class QuantumComputer extends Blueprint {
     isValid() {
         if (selectedDices.length != 4) return false;
         if (!isPair()) return false;
-        return isInARow(selectedDices.removeDuplicated())
+        return isInARow(removeDuplicated(selectedDices));
     }
 
     canImplement() {
@@ -565,16 +594,17 @@ class Reactor20 extends Blueprint {
     }
 
     canImplement() {
-        return selectedDices.length == 1;
+        return selectedDices.length == 1 && selectedDices[0].num != 1;
     }
 
     useImplement() {
         let num1, num2;
-        num1 = selectedDices[0] / 2;
-        if (selectedDices[0] % 2 != 0) num2 = selectedDices[0] / 2 + 1;
+        num1 = Math.floor(selectedDices[0].num / 2);
+        if (selectedDices[0].num % 2 != 0) num2 = num1 + 1;
         else num2 = num1;
         RollADieAt(DiceE, num1);
         RollADieAt(DiceE, num2);
+        spendDice();
     }
 
 }
@@ -593,8 +623,9 @@ class EnergySaver extends Blueprint {
     BuyImplement() {
         super.BuyImplement();
         turnEndEvents.push(() => {
-            if (document.querySelectorAll(".Dice").length > 1) {
-                RollADieAt(DiceE, GetRandomOddNum(), diceStatus.Wild);
+            console.log(Dices.length);
+            if (Dices.length > 1) {
+                diceToRoll += 2;
             }
         });
     }
@@ -662,7 +693,7 @@ class SelfrepairMaterial extends Blueprint {
     BuyImplement() {
         super.BuyImplement();
         turnEndEvents.push(() => {
-            if (PreserveE.querySelectorAll(".Dice").length == 0) diceToRoll += 2;
+            if (DiceE.querySelectorAll(".Dice").length == 0) diceToRoll += 2;
         });
     }
 
@@ -676,7 +707,7 @@ class Observatory extends Blueprint {
 
     isValid() {
         if (selectedDices.length != 3) return false;
-        if (selectedDices.some(e => e.num == 6)) return false;
+        if (!selectedDices.some(e => e.num == 6)) return false;
         return isInARow();
     }
 
@@ -719,7 +750,11 @@ class Prototype extends Blueprint {
     }
 
     isValid() {
-        if (selectedDices.length != 3) return false;
+        if (selectedDices.length != 3) {
+            console.log("wrong dice number");
+            infoEle.innerText = "wrong dice number";
+            return false;
+        }
         return isInARow();
     }
 
@@ -740,7 +775,10 @@ class Reactor25 extends Blueprint {
         let sum = 0;
         selectedDices.forEach(e => sum += e.num);
         if (sum == 25) return true;
-        else return false;
+        else {
+            console.log("wrong sum");
+            return false;
+        }
     }
 
     canImplement() {
@@ -751,6 +789,7 @@ class Reactor25 extends Blueprint {
         let n = selectedDices[0].num;
         RollADieAt(DiceE, n + 1);
         RollADieAt(DiceE, n - 1);
+        spendDice();
     }
 
 }
@@ -762,8 +801,11 @@ class Extractor extends Blueprint {
     }
 
     isValid() {
-        if (selectedDices.length != 3) return false;
-        if (selectedDices.some(e => e.num == 6)) return false;
+        if (selectedDices.length != 3) {
+            infoEle.innerText = "wrong dice number";
+            return false;
+        }
+        if (!selectedDices.some(e => e.num == 6)) return false;
         return isInARow();
     }
 
@@ -772,6 +814,7 @@ class Extractor extends Blueprint {
     }
 
     useImplement() {
+        spendDice();
         RollADieAt(PreserveE, 1, diceStatus.Wild);
     }
 
@@ -834,6 +877,7 @@ class ThreeDPrinter extends Blueprint {
     }
 
     useImplement() {
+        spendDice();
         RollADieAt(DiceE, 1, diceStatus.Wild);
     }
 
@@ -857,6 +901,7 @@ class Transporter extends Blueprint {
         super.BuyImplement();
         turnStartEvents.push(() => {
             MODSum++;
+            UpdateMOD();
         });
     }
 
@@ -901,8 +946,12 @@ class Reactor16 extends Blueprint {
 
     useImplement() {
         let n = selectedDices[0].num;
-        RollADieAt(DiceE, n + 1);
-        RollADieAt(DiceE, n - 1);
+        n += selectedDices[1].num;
+        selectedDices[0].ChangeNum(Math.floor(n / 2));
+        if (n % 2 == 0) {
+            selectedDices[1].ChangeNum(Math.floor(n / 2));
+        }
+        else selectedDices[1].ChangeNum(Math.floor(n / 2) + 1);
     }
 
 }
@@ -919,12 +968,13 @@ class Project extends ItemObj {
 
     buy() {
         if (super.buy()) {
-            document.getElementById("Project" + id).remove();
-            spendDice();
+            this.item.remove();
+            console.log("bought a project");
             if (--projectLeft <= 0) {
                 Win();
             }
         }
+        console.log("cant buy this project");
     }
 
     isValid() {
@@ -1110,13 +1160,11 @@ class HerusProject extends Project {
     }
 
     isValid() {
-        if (selectedDices.length != 6) return false;
-        let nums = {};
-        selectedDices.forEach(e => {
-            if (nums.some(n => e == n)) return false;
-            nums.push(e);
-        });
-        return false;
+        if (selectedDices.length != 6) {
+            infoEle.innerText = "Incorrect dice number";
+            return false;
+        };
+        return isInARow() && cc.clickChance == 2;
     }
 }
 
@@ -1132,17 +1180,15 @@ const nextTurnBtn = document.getElementById("NextTurnBtn");
 const MODPlusBtn = document.getElementById("MODPlusBtn");
 const MODMinusBtn = document.getElementById("MODMinusBtn");
 const ruleBtn = document.getElementById("RulesButton");
+const infoEle = document.getElementById("info");
 const totalTurn = 10;
-var HeadquarterUseChance = 2;
 var turnPassed = 0;
-var ifBuiltThisTurn = false; // TODO:
+var ifBuiltThisTurn = false;
 var selectedDices = new Array();
 var projectLeft = 4;
 var MODSum = 0;
 var canChangeSixToOne = false;
 var Colonies = new Array();
-var Projects = new Array();
-var Blueprints = new Array();
 var MODGetWhenDiscard = 1;
 
 const dicePlace = {
@@ -1165,27 +1211,57 @@ function GameStart() {
             element.removeChild(element.firstChild);
         }
     });
+    infoEle.innerText = "";
     nextTurnBtn.style.display = "inline-block";
     Dices.length = 0;
+    document.addEventListener('contextmenu', (e) => {
+        e.preventDefault();
+    })
     nextTurnBtn.addEventListener('click', () => EndTurn());
     MODPlusBtn.addEventListener('click', () => {
         if (selectedDices.length != 1) return;
-        if ((selectedDices[0].diceStatus == diceStatus.Wild && selectedDices[0].num < 6) || (MODSum >= 1 && (selectedDices[0].num < 6 || canChangeSixToOne))) {
-            selectedDices[0].ChangeNum(++selectedDices[0].num);
-            if (selectedDices[0].diceStatus != diceStatus.Wild) MODSum--;
-            console.log(`Addtion in No.${selectedDices[0].id} Dice using M.O.D.`);
-            UpdateMOD();
+        if (MODSum >= 1 || selectedDices[0].diceStatus == diceStatus.Wild) {
+            if (selectedDices[0].num < 6) {
+                selectedDices[0].ChangeNum(++selectedDices[0].num);
+                console.log(selectedDices[0].num);
+                if (selectedDices[0].diceStatus != diceStatus.Wild) MODSum--;
+                console.log(`Substraction in No.${selectedDices[0].id} Dice using M.O.D.`);
+                UpdateMOD();
+            }
+            else if (canChangeSixToOne) {
+                selectedDices[0].ChangeNum(1);
+                console.log(selectedDices[0].num);
+                if (selectedDices[0].diceStatus != diceStatus.Wild) MODSum--;
+                console.log(`Substraction in No.${selectedDices[0].id} Dice using M.O.D.`);
+                UpdateMOD();
+            }
         }
-
+        else {
+            console.log(`Attempt to add No.${selectedDices[0].id} Dice's value using M.O.D., but failed due to insufficient M.O.D.`);
+            infoEle.innerText = "insufficient M.O.D.";
+        }
     });
     MODMinusBtn.addEventListener('click', () => {
         if (selectedDices.length != 1) return;
-        if ((selectedDices[0].diceStatus == diceStatus.Wild && selectedDices[0].num > 1) || (MODSum >= 1 && (selectedDices[0].num > 1 || canChangeSixToOne))) {
-            selectedDices[0].ChangeNum(--selectedDices[0].num);
-            console.log(selectedDices[0].num);
-            if (selectedDices[0].diceStatus != diceStatus.Wild) MODSum--;
-            console.log(`Substraction in No.${selectedDices[0].id} Dice using M.O.D.`);
-            UpdateMOD();
+        if (MODSum >= 1 || selectedDices[0].diceStatus == diceStatus.Wild) {
+            if (selectedDices[0].num > 1) {
+                selectedDices[0].ChangeNum(--selectedDices[0].num);
+                console.log(selectedDices[0].num);
+                if (selectedDices[0].diceStatus != diceStatus.Wild) MODSum--;
+                console.log(`Substraction in No.${selectedDices[0].id} Dice using M.O.D.`);
+                UpdateMOD();
+            }
+            else if (canChangeSixToOne) {
+                selectedDices[0].ChangeNum(6);
+                console.log(selectedDices[0].num);
+                if (selectedDices[0].diceStatus != diceStatus.Wild) MODSum--;
+                console.log(`Substraction in No.${selectedDices[0].id} Dice using M.O.D.`);
+                UpdateMOD();
+            }
+        }
+        else {
+            console.log(`Attempt to substract No.${selectedDices[0].id} Dice's value using M.O.D., but failed due to insufficient M.O.D.`);
+            infoEle.innerText = "insufficient M.O.D.";
         }
     });
     ruleBtn.addEventListener('click', () => window.open("./PanguProject.pdf"));
@@ -1193,16 +1269,21 @@ function GameStart() {
     for (let i = 0; i < 3; i++) {
         GetRandomBlueprint();
     }
-    var headquarter = new Headquarter();
+    headquarter = new Headquarter();
+    cc = new CommandCenter();
+    lab = new Laboratory();
+    fo = new Forge();
     headquarter.buy();
-    var cc = new CommandCenter();
     cc.buy();
-    var lab = new Laboratory();
     lab.buy();
-    var fo = new Forge();
     fo.buy();
     StartTurn();
 }
+
+var headquarter = new Headquarter();
+var cc = new CommandCenter();
+var lab = new Laboratory();
+var fo = new Forge();
 
 function RollADieAt(Place = DiceE, num = 0, Status = diceStatus.Normal) {
     let p;
@@ -1265,10 +1346,14 @@ function GetRandomEvenNum() {
 }
 
 function isInARow(targetA = selectedDices) {
-    let tempArray = Array.from(targetA);
+    let tempArray = targetA.slice();
     tempArray.sort((a, b) => a.num - b.num);
+    console.log("row func ", tempArray.slice());
     for (let i = 0; i < tempArray.length - 1; i++) {
-        if (Math.abs(tempArray[i].num - tempArray[i + 1].num) != 1) return false;
+        if (Math.abs(tempArray[i].num - tempArray[i + 1].num) != 1) {
+            console.log("not in a row");
+            return false;
+        }
     }
     return true;
 }
@@ -1277,31 +1362,51 @@ function isPair() {
     let tempA = new Array();
     for (let i = 0; i < selectedDices.length; i++) {
         if (tempA.some(e => e == selectedDices[i].num)) {
-            tempA.splice(tempA.indexOf(this), 1);
+            tempA.splice(tempA.findIndex(e => e == selectedDices[i].num), 1);
         }
-        else tempA.push(selectedDices[i].num);
+        else {
+            tempA.push(selectedDices[i].num);
+        }
     }
-    return tempA.length == 0;
+    if (tempA.length == 0) {
+        return true;
+    }
+    else {
+        console.log("not pair");
+        return false;
+    }
 }
 
 function isOfAKind() {
     selectedDices.forEach(e => {
-        if (e.num != selectedDices[0].num) return false;
+        if (e.num != selectedDices[0].num) {
+            console.log("not of a kind");
+            return false;
+        }
     });
     return true;
 }
 
-function removeDuplicated() {
-    return arr.filter((item, index) => arr.indexOf(item) === index);
+function removeDuplicated(arr) {
+    let tempA = new Array();
+    arr.forEach(e => {
+        if (!tempA.some(a => a.num == e.num)) tempA.push(e);
+    })
+    console.log("after remove duplicated element: ", tempA);
+    return tempA;
 }
 
 function isFullHouse() {
-    if (selectedDices.length != 5) return false;
+    if (selectedDices.length != 5) {
+        console.log("not fullhouse");
+        return false;
+    }
     let tempA = selectedDices.sort((a, b) => a - b);
     if ((tempA[0].num === tempA[1].num && tempA[1].num === tempA[2].num && tempA[3].num === tempA[4].num) ||
         (tempA[0].num === tempA[1].num && tempA[2].num === tempA[3].num && tempA[3].num === tempA[4].num)) {
         return true;
     } else {
+        console.log("not fullhouse");
         return false;
     }
 }
@@ -1313,13 +1418,15 @@ function spendDice() {
         whenSpendDice.forEach(e => e());
     }
     selectedDices.forEach(e => e.Consume());
+    selectedDices.length = 0;
 }
 
 var whenReroll = new Array();
 var diceToReroll = new Array();
 function RerollDices(targetDices = selectedDices.filter(e => e.diceStatus == diceStatus.Normal)) {
     diceToReroll.length = 0;
-    diceToReroll = targetDices;
+    diceToReroll = targetDices.slice();
+    console.log(targetDices.slice());
     if (whenReroll.length != 0) {
         whenReroll.forEach(e => e());
     }
@@ -1332,8 +1439,15 @@ var turnEndEvents = new Array();
 function EndTurn() {
     turnPassed++;
     selectedDices.length = 0;
+    Dices.forEach(e => {
+        console.log(e.id, e);
+        e.dice.classList.remove("SelectedDice");
+
+    });
+    ifBuiltThisTurn = false;
     UpdateTurnInfo();
-    if (turnPassed == totalTurn) {
+    infoEle.innerText = "";
+    if (turnPassed >= totalTurn) {
         alert("gameOver");
         return;
     }
@@ -1381,5 +1495,3 @@ function Win() {
 }
 
 GameStart();
-MODSum = 10;
-RollADieAt(PreserveE, 1, diceStatus.Wild);
